@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://rcsdelivery.lovable.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/order-tracking</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/careers</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/route-delivery</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/overnight-delivery</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/bank-delivery</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/laboratory-services</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/same-day-delivery</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/mail-delivery</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/legal-documents</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/government-contracts</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/aircraft-on-ground</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rcsdelivery.lovable.app/services/state-filing-delivery</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+</urlset>

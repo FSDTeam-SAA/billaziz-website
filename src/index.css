@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 220 30% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 12%;
+
+    --primary: 24 95% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 20% 94%;
+    --secondary-foreground: 220 30% 12%;
+
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 10% 46%;
+
+    --accent: 220 30% 12%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 24 95% 50%;
+
+    --radius: 0.5rem;
+
+    /* Brand tokens */
+    --brand-orange: 24 95% 50%;
+    --brand-orange-hover: 24 95% 43%;
+    --brand-orange-light: 24 60% 95%;
+    --brand-navy: 220 30% 12%;
+    --brand-navy-light: 220 25% 18%;
+    --brand-warm-bg: 220 20% 97%;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
+    --shadow-xl: 0 20px 50px rgba(0,0,0,0.12);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 24 95% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+    font-weight: 700;
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .section-padding {
+    @apply px-6 py-16 lg:py-24;
+  }
+
+  .container-max {
+    @apply max-w-7xl mx-auto;
+  }
+
+  .label-text {
+    @apply text-xs font-bold uppercase tracking-[0.15em] text-primary;
+  }
+
+  .heading-display {
+    @apply text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight text-foreground leading-[1.1];
+  }
+
+  .heading-section {
+    @apply text-2xl sm:text-3xl lg:text-[2.25rem] font-bold tracking-tight text-foreground;
+  }
+
+  .body-large {
+    @apply text-lg text-muted-foreground leading-relaxed;
+  }
+
+  .card-surface {
+    @apply bg-card rounded-xl border border-border;
+  }
+
+  .img-contained {
+    @apply rounded-xl object-cover;
+  }
+
+  .bg-section-alt {
+    background-color: hsl(var(--brand-warm-bg));
+  }
+}
+
+/* Ensure Tawk.to chatbot is always visible on mobile */
+iframe[title="chat widget"],
+.tawk-min-container,
+#tawk-bubble-container,
+.tawk-button-circle,
+[class*="tawk"] {
+  z-index: 9999 !important;
+}
