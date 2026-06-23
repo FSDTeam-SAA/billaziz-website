@@ -5,7 +5,14 @@ import { useToast } from "@/hooks/use-toast";
 
 type Step = 1 | 2 | 3;
 
-const FORMSPREE_URL = "https://formspree.io/f/xjgaqery";
+const backendBaseUrl =
+  ((import.meta.env as ImportMetaEnv & {
+    NEXT_PUBLIC_BACKEND_URL?: string;
+    VITE_BACKEND_URL?: string;
+  }).VITE_BACKEND_URL ||
+    (import.meta.env as ImportMetaEnv & { NEXT_PUBLIC_BACKEND_URL?: string })
+      .NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:5001/api/v1").replace(/\/$/, "");
 
 const DispatchForm = () => {
   const [step, setStep] = useState<Step>(1);
@@ -54,30 +61,33 @@ const DispatchForm = () => {
   const handleSubmit = async () => {
     setSending(true);
     try {
-      const response = await fetch(FORMSPREE_URL, {
+      const response = await fetch(`${backendBaseUrl}/leads`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json", accept: "*/*" },
         body: JSON.stringify({
-          _replyto: "info@rcsdelivery.com",
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          company: formData.company || "N/A",
-          pickup_address: formData.pickupAddress,
-          dropoff_address: formData.dropoffAddress,
-          item_type: formData.itemType,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          company: formData.company.trim() || "N/A",
+          pickupAddress: formData.pickupAddress.trim(),
+          dropoffAddress: formData.dropoffAddress.trim(),
+          itemType: formData.itemType,
           urgency: formData.urgency,
-          notes: formData.notes || "None",
+          formNotes: formData.notes.trim() || "None",
+          source: "Website Form",
+          status: "New",
         }),
       });
+
       if (!response.ok) {
         const data = await response.json().catch(() => null);
-        const msg = data?.errors?.[0]?.message || "Form submission failed";
+        const msg = data?.message || data?.errors?.[0]?.message || "Form submission failed";
         throw new Error(msg);
       }
+
       setSubmitted(true);
     } catch (error) {
-      console.error("Formspree error:", error);
+      console.error("Lead submission error:", error);
       toast({
         title: "Something went wrong",
         description: error instanceof Error ? error.message : "Please try again or call us directly at 888-786-0080.",
@@ -198,12 +208,12 @@ const DispatchForm = () => {
                   <input type="text" placeholder="Drop-off address or ZIP code *" value={formData.dropoffAddress} onChange={(e) => updateField("dropoffAddress", e.target.value)} className={inputClass} />
                   <select value={formData.itemType} onChange={(e) => updateField("itemType", e.target.value)} className={selectClass}>
                     <option value="">What are we picking up? *</option>
-                    <option value="specimen">Lab Specimen / Medical</option>
-                    <option value="legal">Legal Documents</option>
-                    <option value="bank">Bank / Financial</option>
-                    <option value="pharmacy">Pharmacy / Rx</option>
-                    <option value="mail">Mail / Letters / Packages</option>
-                    <option value="other">Other</option>
+                    <option value="Lab Specimen / Medical">Lab Specimen / Medical</option>
+                    <option value="Legal Documents">Legal Documents</option>
+                    <option value="Bank / Financial">Bank / Financial</option>
+                    <option value="Pharmacy / Rx">Pharmacy / Rx</option>
+                    <option value="Mail / Letters / Packages">Mail / Letters / Packages</option>
+                    <option value="Other">Other</option>
                   </select>
                 </motion.div>
               )}
@@ -212,10 +222,10 @@ const DispatchForm = () => {
                   <h3 className="text-lg font-bold mb-2">Urgency & Details</h3>
                   <select value={formData.urgency} onChange={(e) => updateField("urgency", e.target.value)} className={selectClass}>
                     <option value="">How urgent? *</option>
-                    <option value="stat">STAT — pickup within 1 hour</option>
-                    <option value="sameday">Same day delivery</option>
-                    <option value="overnight">Overnight (by 9:30 AM)</option>
-                    <option value="scheduled">Scheduled / Recurring</option>
+                    <option value="STAT - pickup within 1 hour">STAT — pickup within 1 hour</option>
+                    <option value="Same day delivery">Same day delivery</option>
+                    <option value="Overnight (by 9:30 AM)">Overnight (by 9:30 AM)</option>
+                    <option value="Scheduled / Recurring">Scheduled / Recurring</option>
                   </select>
                   <textarea
                     placeholder="Special instructions (temperature requirements, loading dock, etc.)"
