@@ -1,34 +1,35 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Briefcase, MapPin, Clock, ArrowRight, Phone, CheckCircle, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-const FORMSPREE_URL = "https://formspree.io/f/xjgaqery";
+const backendBaseUrl =
+  ((import.meta.env as ImportMetaEnv & {
+    NEXT_PUBLIC_BACKEND_URL?: string;
+    VITE_BACKEND_URL?: string;
+  }).VITE_BACKEND_URL ||
+    (import.meta.env as ImportMetaEnv & { NEXT_PUBLIC_BACKEND_URL?: string })
+      .NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:5001/api/v1").replace(/\/$/, "");
 
-const openPositions = [
-  {
-    title: "Courier Driver – Full Time",
-    location: "Nationwide",
-    type: "Full-Time",
-    description:
-      "Join our team of professional drivers delivering time-sensitive packages across all 50 states. Must have a clean driving record and reliable vehicle.",
-  },
-  {
-    title: "Courier Driver – Part Time",
-    location: "Nationwide",
-    type: "Part-Time",
-    description:
-      "Flexible part-time driving opportunities for motivated individuals. Perfect for those looking for supplemental income with a flexible schedule.",
-  },
-  {
-    title: "Dispatch Coordinator",
-    location: "Remote / Office",
-    type: "Full-Time",
-    description:
-      "Coordinate deliveries, manage driver assignments, and ensure on-time performance. Strong communication and organizational skills required.",
-  },
-];
+type JobItem = {
+  _id: string;
+  title: string;
+  description: string;
+  category?: string;
+  location?: string;
+  experienceLevel?: string;
+  companyName?: string;
+  requiredSkills?: string[];
+  salaryRange?: string;
+  vacancy?: number;
+  applicationDeadline?: string;
+};
+
+type JobsResponse = {
+  data?: JobItem[];
+};
 
 const benefits = [
   "Competitive pay & bonuses",
@@ -41,41 +42,110 @@ const benefits = [
 
 const Careers = () => {
   const { toast } = useToast();
+  const [jobs, setJobs] = useState<JobItem[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", position: "", message: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    position: "",
+    message: "",
+  });
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadJobs = async () => {
+      try {
+        const response = await fetch(`${backendBaseUrl}/jobs/public`, {
+          headers: { accept: "*/*" },
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load jobs");
+        }
+
+        const result: JobsResponse = await response.json();
+        setJobs(result.data || []);
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+
+        console.error("Jobs fetch error:", error);
+        toast({
+          title: "Unable to load positions",
+          description: "Please refresh the page or call us at 888-786-0080.",
+          variant: "destructive",
+        });
+      } finally {
+        setJobsLoading(false);
+      }
+    };
+
+    loadJobs();
+
+    return () => controller.abort();
+  }, [toast]);
+
+  const handlePositionSelect = (position: string) => {
+    setForm((prev) => ({ ...prev, position }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+    if (
+      !form.name.trim() ||
+      !form.email.trim() ||
+      !form.phone.trim() ||
+      !form.position.trim() ||
+      !form.message.trim()
+    ) {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
     setSending(true);
     try {
-      const res = await fetch(FORMSPREE_URL, {
+      const res = await fetch(`${backendBaseUrl}/applied-jobs/apply`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json", accept: "*/*" },
         body: JSON.stringify({
-          _replyto: "info@rcsdelivery.com",
-          _subject: `Career Application: ${form.position || "General"}`,
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          position: form.position || "General Application",
-          message: form.message || "N/A",
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          interestedPosition: form.position.trim(),
+          tellUsYourself: form.message.trim(),
         }),
       });
-      if (!res.ok) throw new Error("Submission failed");
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const msg = data?.message || data?.errors?.[0]?.message || "Submission failed";
+        throw new Error(msg);
+      }
+
       setSubmitted(true);
-    } catch {
-      toast({ title: "Something went wrong", description: "Please try again or call us at 888-786-0080.", variant: "destructive" });
+      setForm({ name: "", email: "", phone: "", position: "", message: "" });
+    } catch (error) {
+      console.error("Job application error:", error);
+      toast({
+        title: "Something went wrong",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Please try again or call us at 888-786-0080.",
+        variant: "destructive",
+      });
     } finally {
       setSending(false);
     }
   };
 
   const inputClass = "w-full h-12 px-4 rounded-xl bg-background border border-input text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors";
+  const isSubmitDisabled = sending || jobsLoading || jobs.length === 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -118,17 +188,69 @@ const Careers = () => {
             Open <span className="text-primary">Positions</span>
           </h2>
           <div className="space-y-5 max-w-3xl mx-auto">
-            {openPositions.map((pos) => (
-              <div key={pos.title} className="bg-card rounded-xl border border-border p-6 md:p-8">
+            {jobsLoading && (
+              <div className="bg-card rounded-xl border border-border p-8 flex items-center justify-center gap-3 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading open positions...
+              </div>
+            )}
+
+            {!jobsLoading && jobs.length === 0 && (
+              <div className="bg-card rounded-xl border border-border p-8 text-center">
+                <h3 className="text-lg font-bold text-foreground mb-2">No open positions right now</h3>
+                <p className="text-sm text-muted-foreground">
+                  Please check back soon or call 888-786-0080 for hiring updates.
+                </p>
+              </div>
+            )}
+
+            {jobs.map((job) => (
+              <div key={job._id} className="bg-card rounded-xl border border-border p-6 md:p-8">
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                  <h3 className="text-xl font-bold text-foreground">{pos.title}</h3>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{pos.location}</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{pos.type}</span>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">{job.title}</h3>
+                    {job.companyName && (
+                      <p className="text-sm text-muted-foreground mt-1">{job.companyName}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {job.location || "Location not specified"}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      {job.category || "Open Role"}
+                    </span>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground mb-5">{pos.description}</p>
-                <a href="#apply" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+                <p className="text-sm text-muted-foreground mb-4">{job.description}</p>
+
+                {(job.experienceLevel || job.salaryRange || job.vacancy) && (
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {job.experienceLevel && (
+                      <span className="px-3 py-1 rounded-full bg-muted text-xs font-medium text-foreground">
+                        {job.experienceLevel}
+                      </span>
+                    )}
+                    {job.salaryRange && (
+                      <span className="px-3 py-1 rounded-full bg-muted text-xs font-medium text-foreground">
+                        {job.salaryRange}
+                      </span>
+                    )}
+                    {typeof job.vacancy === "number" && (
+                      <span className="px-3 py-1 rounded-full bg-muted text-xs font-medium text-foreground">
+                        {job.vacancy} {job.vacancy > 1 ? "Vacancies" : "Vacancy"}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <a
+                  href="#apply"
+                  onClick={() => handlePositionSelect(job.title)}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+                >
                   Apply Now <ArrowRight className="w-3.5 h-3.5" />
                 </a>
               </div>
@@ -164,15 +286,21 @@ const Careers = () => {
                 <input type="email" placeholder="Email *" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} />
                 <input type="tel" placeholder="Phone *" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputClass + " tabular-nums"} />
               </div>
-              <select value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} className={inputClass}>
-                <option value="">Position interested in (optional)</option>
-                <option value="Courier Driver – Full Time">Courier Driver – Full Time</option>
-                <option value="Courier Driver – Part Time">Courier Driver – Part Time</option>
-                <option value="Dispatch Coordinator">Dispatch Coordinator</option>
-                <option value="Other">Other</option>
+              <select
+                value={form.position}
+                onChange={(e) => setForm({ ...form, position: e.target.value })}
+                className={inputClass}
+                disabled={jobsLoading || jobs.length === 0}
+              >
+                <option value="">Position interested in *</option>
+                {jobs.map((job) => (
+                  <option key={job._id} value={job.title}>
+                    {job.title}
+                  </option>
+                ))}
               </select>
               <textarea
-                placeholder="Tell us about yourself..."
+                placeholder="Tell us about yourself *"
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 className="w-full h-28 px-4 py-3 rounded-xl bg-background border border-input text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none transition-colors"
@@ -183,7 +311,7 @@ const Careers = () => {
                 </a>
                 <button
                   type="submit"
-                  disabled={sending}
+                  disabled={isSubmitDisabled}
                   className="inline-flex items-center gap-2 h-11 px-6 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-brand-hover transition-all active:scale-[0.97] disabled:opacity-70"
                 >
                   {sending ? (<>Sending… <Loader2 className="w-4 h-4 animate-spin" /></>) : (<>Submit Application <ArrowRight className="w-4 h-4" /></>)}
