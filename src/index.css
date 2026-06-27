@@ -121,12 +121,3 @@
     background-color: hsl(var(--brand-warm-bg));
   }
 }
-
-/* Ensure Tawk.to chatbot is always visible on mobile */
-iframe[title="chat widget"],
-.tawk-min-container,
-#tawk-bubble-container,
-.tawk-button-circle,
-[class*="tawk"] {
-  z-index: 9999 !important;
-}

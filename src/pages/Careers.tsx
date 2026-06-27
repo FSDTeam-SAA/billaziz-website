@@ -5,12 +5,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const backendBaseUrl =
-  ((import.meta.env as ImportMetaEnv & {
-    NEXT_PUBLIC_BACKEND_URL?: string;
-    VITE_BACKEND_URL?: string;
-  }).VITE_BACKEND_URL ||
-    (import.meta.env as ImportMetaEnv & { NEXT_PUBLIC_BACKEND_URL?: string })
-      .NEXT_PUBLIC_BACKEND_URL ||
+  ((import.meta.env as ImportMetaEnv & { VITE_BACKEND_URL?: string }).VITE_BACKEND_URL ||
     "http://localhost:5001/api/v1").replace(/\/$/, "");
 
 type JobItem = {
