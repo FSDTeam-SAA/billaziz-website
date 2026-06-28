@@ -19,12 +19,33 @@ type ChatResponse = {
   };
 };
 
-const CHAT_API_URL =
-  (import.meta.env as ImportMetaEnv & { VITE_CHAT_API_URL?: string }).VITE_CHAT_API_URL ||
-  "/api/chat";
-const CHAT_HISTORY_URL =
-  (import.meta.env as ImportMetaEnv & { VITE_CHAT_HISTORY_URL?: string }).VITE_CHAT_HISTORY_URL ||
-  "/api/chat/history";
+type ChatEnv = ImportMetaEnv & {
+  VITE_CHAT_API_URL?: string;
+  VITE_CHAT_HISTORY_URL?: string;
+};
+
+const getChatUrl = (envUrl: string | undefined, fallbackPath: string) => {
+  const url = envUrl?.trim() || fallbackPath;
+
+  if (typeof window === "undefined") return url;
+
+  if (window.location.protocol === "https:" && url.startsWith("http://")) {
+    try {
+      return new URL(url).pathname || fallbackPath;
+    } catch {
+      return fallbackPath;
+    }
+  }
+
+  return url;
+};
+
+const chatEnv = import.meta.env as ChatEnv;
+const CHAT_API_URL = getChatUrl(chatEnv.VITE_CHAT_API_URL, "/api/chat");
+const CHAT_HISTORY_URL = getChatUrl(
+  chatEnv.VITE_CHAT_HISTORY_URL,
+  "/api/chat/history",
+);
 const CHAT_USER_ID_KEY = "rcs-chat-user-id";
 
 const welcomeMessage: ChatMessage = {
