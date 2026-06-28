@@ -180,7 +180,7 @@ const ChatBot = () => {
   }
 
   return (
-    <section className="fixed bottom-4 right-4 z-50 flex h-[min(620px,calc(100vh-2rem))] w-[calc(100vw-2rem)] max-w-[360px] flex-col overflow-hidden rounded-t-2xl rounded-b-md border border-black/10 bg-white text-slate-900 shadow-[0_24px_70px_rgba(15,23,42,0.28)] sm:bottom-5 sm:right-5">
+    <section className="fixed bottom-4 right-4 z-50 flex h-[min(620px,calc(100vh-2rem))] w-[calc(100vw-2rem)] max-w-[420px] flex-col overflow-hidden rounded-t-2xl rounded-b-md border border-black/10 bg-white text-slate-900 shadow-[0_24px_70px_rgba(15,23,42,0.28)] sm:bottom-5 sm:right-5">
       <header className="flex h-14 items-center gap-3 bg-[#6dbb0f] px-4 text-white">
         <button
           type="button"
