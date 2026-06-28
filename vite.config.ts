@@ -18,6 +18,12 @@ export default defineConfig(async ({ mode }) => {
       hmr: {
         overlay: false,
       },
+      proxy: {
+        "/api/chat": {
+          target: "http://187.77.187.56:8010",
+          changeOrigin: true,
+        },
+      },
     },
     plugins,
     resolve: {
