@@ -19,8 +19,12 @@ type ChatResponse = {
   };
 };
 
-const CHAT_API_URL = "/api/chat";
-const CHAT_HISTORY_URL = "/api/chat/history";
+const CHAT_API_URL =
+  (import.meta.env as ImportMetaEnv & { VITE_CHAT_API_URL?: string }).VITE_CHAT_API_URL ||
+  "/api/chat";
+const CHAT_HISTORY_URL =
+  (import.meta.env as ImportMetaEnv & { VITE_CHAT_HISTORY_URL?: string }).VITE_CHAT_HISTORY_URL ||
+  "/api/chat/history";
 const CHAT_USER_ID_KEY = "rcs-chat-user-id";
 
 const welcomeMessage: ChatMessage = {
