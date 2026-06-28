@@ -20,30 +20,42 @@ type ChatResponse = {
 };
 
 type ChatEnv = ImportMetaEnv & {
-  VITE_CHAT_API_URL?: string;
-  VITE_CHAT_HISTORY_URL?: string;
+  VITE_CHAT_API_BASE_URL?: string;
 };
 
-const getChatUrl = (envUrl: string | undefined, fallbackPath: string) => {
-  const url = envUrl?.trim() || fallbackPath;
+const joinUrl = (baseUrl: string, path: string) =>
+  `${baseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 
-  if (typeof window === "undefined") return url;
+const toBrowserSafeChatUrl = (
+  baseUrl: string | undefined,
+  endpointPath: string,
+  fallbackPath: string,
+) => {
+  const trimmedBaseUrl = baseUrl?.trim();
+  const url = trimmedBaseUrl
+    ? joinUrl(trimmedBaseUrl, endpointPath)
+    : fallbackPath;
 
-  if (window.location.protocol === "https:" && url.startsWith("http://")) {
-    try {
-      return new URL(url).pathname || fallbackPath;
-    } catch {
-      return fallbackPath;
-    }
+  if (typeof window === "undefined") return fallbackPath;
+  if (!url.startsWith("http://")) return url;
+
+  try {
+    const { pathname } = new URL(url);
+    return window.location.protocol === "https:" ? pathname : url;
+  } catch {
+    return fallbackPath;
   }
-
-  return url;
 };
 
 const chatEnv = import.meta.env as ChatEnv;
-const CHAT_API_URL = getChatUrl(chatEnv.VITE_CHAT_API_URL, "/api/chat");
-const CHAT_HISTORY_URL = getChatUrl(
-  chatEnv.VITE_CHAT_HISTORY_URL,
+const CHAT_API_URL = toBrowserSafeChatUrl(
+  chatEnv.VITE_CHAT_API_BASE_URL,
+  "/chat",
+  "/api/chat",
+);
+const CHAT_HISTORY_URL = toBrowserSafeChatUrl(
+  chatEnv.VITE_CHAT_API_BASE_URL,
+  "/chat/history",
   "/api/chat/history",
 );
 const CHAT_USER_ID_KEY = "rcs-chat-user-id";
